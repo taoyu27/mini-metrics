@@ -1,0 +1,33 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: mini-metrics
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      k8s-app: mini-metrics
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: mini-metrics
+    spec:
+      serviceAccountName: mini-metrics
+      containers:
+      - name: kube-state-metrics
+        image: hub.chinacloud.com/prometheus/mini-metrics:v0.4
+        ports:
+        - name: http-metrics
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        command:
+          - /mini-metrics
+          - -alsologtostderr
+          - -v
+          - "3"
